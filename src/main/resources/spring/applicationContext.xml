@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+                        http://www.springframework.org/schema/context
+                        http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+    <context:annotation-config/>
+
+    <bean id="passwordValidationService"
+          class="com.mobilesauce.service.validation.PasswordValidationService">
+        <constructor-arg>
+            <list>
+                <ref bean="passwordLengthValidator"/>
+                <ref bean="passwordCharacterMixtureValidator"/>
+                <ref bean="passwordCharacterSequenceValidator"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="passwordLengthValidator"
+          class="com.mobilesauce.service.validation.PasswordLengthValidator">
+        <property name="minimumPasswordLength" value="5"/>
+        <property name="maximumPasswordLength" value="12"/>
+    </bean>
+
+    <bean id="passwordCharacterMixtureValidator"
+          class="com.mobilesauce.service.validation.PasswordRegularExpressionValidator">
+        <property name="regularExpression" value="(.*[a-z]+[0-9]+.*)"/>
+        <property name="errorIfMatch" value="false"/>
+        <property name="validationCriteria" value="#{T(com.mobilesauce.common.PortalConstants).PASSWORD_CHARACTER_MIXTURE}"/>
+        <property name="validationCriteriaMessage" value="At least 1 lower case and 1 digit!"/>
+    </bean>
+
+    <bean id="passwordCharacterSequenceValidator"
+          class="com.mobilesauce.service.validation.PasswordRegularExpressionValidator">
+        <!-- if it matches with 1 set of repeating sequence, flag as error -->
+        <property name="regularExpression" value="(.+)\1"/>
+        <property name="errorIfMatch" value="true"/>
+        <property name="validationCriteria" value="#{T(com.mobilesauce.common.PortalConstants).PASSWORD_CHARACTER_SEQUENCE}"/>
+        <property name="validationCriteriaMessage" value="No sequence of characters immediately followed by another."/>
+    </bean>
+</beans>
